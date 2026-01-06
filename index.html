@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurare Windows 12</title>
+    <style>
+        body {
+            background: #000;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* --- 1. ЭКРАН ЗАГРУЗКИ (BOOT) --- */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        /* --- 2. ИНТЕРФЕЙС УСТАНОВКИ --- */
+        #setup-interface {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: url('wallpapersden.com_windows-12-concept_3840x2160.jpg') center/cover no-repeat;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glass-container {
+            width: 850px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            display: flex;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .sidebar {
+            width: 240px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 40px 25px;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+        .windows12{
+            left: 120px;
+            position: absolute;
+            bottom: 15px;
+        }
+        .logo-box img {
+            height: 22px;
+            width: 22px;
+            position: absolute;
+            bottom: 30px;
+            left: 80px;
+        }
+
+        .sidebar li { list-style: none; padding: 10px 0; color: rgba(255,255,255,0.3); font-size: 0.85rem; }
+        .sidebar li.active { color: white; font-weight: 500;}
+
+        .main-content { flex: 1; padding: 50px; display: flex; flex-direction: column; }
+        .screen { display: none; height: 100%; flex-direction: column; }
+        .screen.active { display: flex; }
+
+        h1 { font-weight: 300; margin: 0 0 10px; font-size: 1.8rem; }
+        .desc { color: rgba(255, 255, 255, 0.6); margin-bottom: 30px; font-size: 0.95rem; }
+
+        select, input[type="text"] {
+            width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px;
+            color: white; outline: none; box-sizing: border-box; margin-bottom: 20px;
+        }
+
+        .os-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .os-option {
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .os-option:hover { background: rgba(255,255,255,0.1); }
+        .os-option.selected { border-color: #0078d4; background: rgba(0, 120, 212, 0.2); }
+
+        .license-box {
+            background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px;
+            height: 150px; overflow-y: auto; font-size: 0.85rem; margin-bottom: 15px;
+        }
+
+        .disk-item {
+            padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between;
+        }
+        .disk-item.selected { border-color: #0078d4; background: rgba(0, 120, 212, 0.2); }
+
+        .win11-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .progress-container { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 20px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: #0078d4; transition: width 0.1s linear; }
+
+        .footer { margin-top: auto; display: flex; justify-content: flex-end; gap: 15px; }
+        button { padding: 10px 35px; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #444; color: #888; }
+        .setuplogo{
+            height: 40px;
+            width: 40px;
+            position: absolute;
+            top: 5px;
+            left: 10px;
+        }
+        .windowssetup{
+            position: absolute;
+            left: 55px;
+            top: -5px;
+        }
+        .top-bar{
+            height: 40px;
+            background-color: rgb(0, 0, 0);
+            position: fixed;
+            width: 850px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .win-ctrl-btn:hover { background: rgba(0,0,0,0.06); }
+        .close-btn:hover { background: #e81123 !important; color: white; border-radius: 5px; text-align: center;}
+        .win-ctrl-btn{
+            position: absolute;
+            right: 5px;
+            gap: 5px;
+        }
+        .one{
+            position: absolute;
+            right: 75px;
+        }
+        .two{
+            position: absolute; 
+            right: 45px;
+        }
+        .three{
+            position: absolute;
+            right: 15px;
+        }
+        .one, .two, .three{
+            top: 10px;
+        }
+        .win-ctrl-btn{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="boot-screen">
+        <img src="logo.png" alt="Logo" style="width: 100px; height: 100px; margin-bottom: 50px; object-fit: contain;">
+        <div class="win11-spinner"></div>
+    </div>
+
+    <div id="setup-interface">
+        <div class="glass-container">
+            <div class="top-bar">
+                <img src="R.png" alt="" class="setuplogo">
+                <p class="windowssetup">Configurare Windows</p>
+                <div class="win-controls">
+                    <div class="win-ctrl-btn one">🗕</div>
+                    <div class="win-ctrl-btn two">▢</div>
+                    <div class="win-ctrl-btn close-btn three">✕</div>
+                </div>
+            </div>
+            <aside class="sidebar">
+                <div class="win-logo">
+                    <div class="logo-box"><img src="logo.png" alt=""></div>
+                    <p class="windows12">Windows 12</p>
+                </div>
+                <ul>
+                    <li id="m1" class="active">Setări</li>
+                    <li id="m2">Activare</li>
+                    <li id="m3">Selectare SO</li>
+                    <li id="m4">Licență</li>
+                    <li id="m5">Partiții</li>
+                    <li id="m6">Instalare</li>
+                </ul>
+            </aside>
+
+            <main class="main-content">
+                <div id="step1" class="screen active">
+                    <h1>Setări sistem</h1>
+                    <p class="desc">Alegeți limba și aspectul tastaturii</p>
+                    <select><option>Română (România)</option></select>
+                    <select><option>Română (Standard)</option></select>
+                    <div class="footer"><button onclick="go(2)">Înainte</button></div>
+                </div>
+
+                <div id="step2" class="screen">
+                    <h1>Activare Windows</h1>
+                    <p class="desc">Introduceți cheia de 25 de caractere pentru activarea Windows-ului dvs.</p>
+                    <input type="text" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX">
+                    <div class="footer">
+                        <button style="background:none;" onclick="go(3)">Nu am o cheie de produs</button>
+                        <button onclick="go(3)">Înainte</button>
+                    </div>
+                </div>
+
+                <div id="step3" class="screen">
+                    <h1>Alegeți sistemul de operare pe care doriți să îl instalați</h1>
+                    <p class="desc">Alegeți o ediție Windows</p>
+                    <div class="os-list">
+                        <div class="os-option" id="home" onclick="selectOS(this)">Windows 12 Home</div>
+                        <div class="os-option" id="pro" onclick="selectOS(this)">Windows 12 Pro</div>
+                        <div class="os-option" id="education" onclick="selectOS(this)">Windows 12 Education</div>
+                        <div class="os-option" id="enterprise" onclick="selectOS(this)">Windows 12 Enterprise</div>
+                    </div>
+                    <div class="footer"><button onclick="go(4)">Înainte</button></div>
+                </div>
+
+                <div id="step4" class="screen">
+                    <h1>Termeni și licență</h1>
+                    <div class="license-box">ACESTA NU ESTE UN WINDOWS REAL. Este un concept Windows creat de fani, neoriginal. Nu este afiliat cu Windows sau Microsoft.</div>
+                    <label style="cursor:pointer;">
+                        <input type="checkbox" id="accept" onclick="document.getElementById('btn-lic').disabled = !this.checked"> 
+                        Accept termenii și condițiile de licență
+                    </label>
+                    <div class="footer"><button id="btn-lic" disabled onclick="go(5)">Înainte</button></div>
+                </div>
+
+                <div id="step5" class="screen">
+                    <h1>Discuri și partiții</h1>
+                    <p class="desc">Selectați unde doriți să instalați Windows.</p>
+                    <div class="disk-item selected">Discul 0 Partiția 1 (C:) <span>465 GB</span></div>
+                    <div class="footer"><button onclick="startFinal()">Instalare</button></div>
+                </div>
+
+                <div id="step6" class="screen">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center;">
+                        <h1>Se instalează Windows</h1>
+                        <p id="status" class="desc">Vă rugăm așteptați...</p>
+                        <div class="progress-container"><div class="progress-fill" id="pb"></div></div>
+                        <p style="font-size: 0.8rem; margin-top: 15px; color: rgba(255,255,255,0.4);">Acest proces va dura câteva minute. PC-ul se va reporni.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let selectedOSId = 'home';
+
+        window.onload = function() {
+            setTimeout(() => {
+                document.getElementById('boot-screen').style.display = 'none';
+                document.getElementById('setup-interface').style.display = 'flex';
+            }, 3000);
+        };
+
+        function go(s) {
+            document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active'));
+            document.getElementById('step' + s).classList.add('active');
+            document.querySelectorAll('.sidebar li').forEach((li, i) => {
+                li.classList.toggle('active', i + 1 === s);
+            });
+        }
+
+        function selectOS(element) {
+            document.querySelectorAll('.os-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedOSId = element.id;
+        }
+
+        function startFinal() {
+            go(6);
+            let current = 0;
+            const bar = document.getElementById('pb');
+            const stat = document.getElementById('status');
+
+            const timer = setInterval(() => {
+                current++;
+                bar.style.width = current + '%';
+                
+                if (current < 20) stat.innerText = `Se pregătesc fișierele pentru instalare... (${current}%)`;
+                else if (current < 85) stat.innerText = `Se descarcă componentele... (${current}%)`;
+                else stat.innerText = `Se finalizează instalarea... (${current}%)`;
+
+                if (current >= 100) {
+                    clearInterval(timer);
+                    stat.innerText = "Instalarea s-a încheiat! Se repornește...";
+                    
+                    setTimeout(() => { 
+                        if (selectedOSId === 'pro') {
+                            window.location.href = 'OSproromanian.html';
+                        } else if (selectedOSId === 'home') {
+                            window.location.href = 'OShomeromanian.html';
+                        } else if (selectedOSId === 'education') {
+                            window.location.href = 'OSeducationromanian.html';
+                        } else if (selectedOSId === 'enterprise') {
+                            window.location.href = 'OSenterpriseromanian.html';
+                        }
+                    }, 2000);
+                }
+            }, 1000); 
+        }
+    </script>
+</body>
+</html>
